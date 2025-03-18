@@ -7,8 +7,8 @@ exports.getAllLikes = async (req, res) => {
   try {
     const likes = await Like.findAll({
       include: [
-        { model: User, attributes: ["userName", "emailAddress"] },
-        { model: Post, attributes: ["title"] },
+        { model: User, attributes: ["userName", "emailAddress"] }, // Include User details
+        { model: Post, attributes: ["postId", "title"] }, // Include Post details
       ],
     });
     res.json({ result: 200, data: likes });
@@ -18,7 +18,7 @@ exports.getAllLikes = async (req, res) => {
   }
 };
 
-// 2. Get Likes by Post ID (GET /api/likes/post/:post_id)
+// 2. Get Likes by Post ID (GET /api/likes/post/:postId)
 exports.getLikesByPost = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -36,7 +36,7 @@ exports.getLikesByPost = async (req, res) => {
   }
 };
 
-// 3. Get Likes by User ID (GET /api/likes/user/:user_id)
+// 3. Get Likes by User ID (GET /api/likes/user/:userId)
 exports.getLikesByUser = async (req, res) => {
   try {
     const { userId } = req.params;
