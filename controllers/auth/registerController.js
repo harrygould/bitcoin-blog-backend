@@ -5,7 +5,14 @@ require("dotenv").config();
 // 1. Register a new user
 exports.register = async (req, res) => {
   try {
-    const { userName, emailAddress, password } = req.body;
+    const {
+      userName,
+      firstName,
+      lastName,
+      emailAddress,
+      phoneNumber,
+      password,
+    } = req.body;
 
     // a. Check if user already exists
     const existingUser = await User.findOne({ where: { emailAddress } });
@@ -20,7 +27,10 @@ exports.register = async (req, res) => {
     // c. Create new user
     const user = await User.create({
       userName,
+      firstName,
+      lastName,
       emailAddress,
+      phoneNumber,
       password: hashedPassword,
     });
 

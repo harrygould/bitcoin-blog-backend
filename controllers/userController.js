@@ -33,13 +33,19 @@ exports.getUser = async (req, res) => {
 // 4. Update a user by ID
 exports.updateUser = async (req, res) => {
   try {
-    const updated = await User.update(req.body, {
-      where: { userId: req.params.id },
-    });
-    updated[0]
-      ? res.json({ message: "User updated" })
-      : res.status(404).json({ message: "User not found" });
+    // Check if the user exists first
+    const user = await User.findOne({ where: { userId: req.params.id } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Proceed to update the user
+    await User.update(req.body, { where: { userId: req.params.id } });
+
+    res.json({ message: "User updated successfully" });
   } catch (error) {
+    console.error("Error updating user:", error);
     res.status(500).json({ error: error.message });
   }
 };

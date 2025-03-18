@@ -18,13 +18,16 @@ exports.getAllComments = async (req, res) => {
   }
 };
 
-// 2. Get Comments by Post ID (GET /api/comments/post/:post_id)
+// 2. Get Comments by Post ID (GET /api/comments/post/:postId)
 exports.getCommentsByPost = async (req, res) => {
   try {
-    const { post_id } = req.params;
+    const { postId } = req.params;
     const comments = await Comment.findAll({
-      where: { post_id },
-      include: [{ model: User, attributes: ["name", "email"] }],
+      where: { postId },
+      include: [
+        { model: User, attributes: ["userName", "emailAddress"] },
+        { model: Post, attributes: ["title"] },
+      ],
     });
 
     res.json({ result: 200, data: comments });
@@ -34,12 +37,12 @@ exports.getCommentsByPost = async (req, res) => {
   }
 };
 
-// 3. Get Comments by User ID (GET /api/comments/user/:user_id)
+// 3. Get Comments by User ID (GET /api/comments/user/:userId)
 exports.getCommentsByUser = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { userId } = req.params;
     const comments = await Comment.findAll({
-      where: { user_id },
+      where: { userId },
       include: [{ model: Post, attributes: ["title", "description"] }],
     });
 
@@ -50,11 +53,11 @@ exports.getCommentsByUser = async (req, res) => {
   }
 };
 
-// 4. Create a Comment (POST /api/comments)
+// 4. Add a Comment (POST /api/comments)
 exports.addComment = async (req, res) => {
   try {
-    const { user_id, post_id, text } = req.body;
-    const newComment = await Comment.create({ user_id, post_id, text });
+    const { userId, postId, comment } = req.body;
+    const newComment = await Comment.create({ userId, postId, comment });
 
     res.json({
       result: 200,
@@ -67,22 +70,27 @@ exports.addComment = async (req, res) => {
   }
 };
 
-// 5. Update a Comment (PUT /api/comments/:id)
+// 5. Update a Comment (PUT /api/comments/:commentId)
 exports.updateComment = async (req, res) => {
   try {
-    const { id } = req.params;
-    const [updated] = await Comment.update(req.body, {
-      where: { id },
-      returning: true,
-    });
+    const { commentId } = req.params; // Extract `commentId` from URL
+    const { comment } = req.body; // Extract updated comment text
 
-    if (!updated) return res.status(404).json({ message: "Comment not found" });
+    // Check if the comment exists
+    const existingComment = await Comment.findByPk(commentId);
+    if (!existingComment) {
+      return res.status(404).json({
+        result: 404,
+        message: "Comment not found",
+      });
+    }
 
-    const updatedComment = await Comment.findByPk(id);
+    // Update the comment
+    await Comment.update({ comment }, { where: { commentId } });
+
     res.json({
       result: 200,
       message: "Comment updated successfully",
-      data: updatedComment,
     });
   } catch (error) {
     console.error("Error updating comment:", error);
@@ -93,8 +101,8 @@ exports.updateComment = async (req, res) => {
 // 6. Delete a Comment (DELETE /api/comments/:id)
 exports.deleteComment = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await Comment.destroy({ where: { id } });
+    const { commentId } = req.params;
+    const deleted = await Comment.destroy({ where: { commentId } });
 
     if (!deleted) return res.status(404).json({ message: "Comment not found" });
 

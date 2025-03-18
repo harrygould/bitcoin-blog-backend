@@ -5,7 +5,12 @@ const Post = require("../models/postModel");
 // 1. Get All Likes (GET /api/likes)
 exports.getAllLikes = async (req, res) => {
   try {
-    const likes = await Like.findAll({ include: [User, Post] });
+    const likes = await Like.findAll({
+      include: [
+        { model: User, attributes: ["userName", "emailAddress"] },
+        { model: Post, attributes: ["title"] },
+      ],
+    });
     res.json({ result: 200, data: likes });
   } catch (error) {
     console.error("Error fetching likes:", error);
@@ -16,12 +21,14 @@ exports.getAllLikes = async (req, res) => {
 // 2. Get Likes by Post ID (GET /api/likes/post/:post_id)
 exports.getLikesByPost = async (req, res) => {
   try {
-    const { post_id } = req.params;
+    const { postId } = req.params;
     const likes = await Like.findAll({
-      where: { post_id },
-      include: [{ model: User, attributes: ["name", "email"] }],
+      where: { postId },
+      include: [
+        { model: User, attributes: ["userName", "emailAddress"] },
+        { model: Post, attributes: ["title"] },
+      ],
     });
-
     res.json({ result: 200, data: likes });
   } catch (error) {
     console.error("Error fetching likes for post:", error);
@@ -32,9 +39,9 @@ exports.getLikesByPost = async (req, res) => {
 // 3. Get Likes by User ID (GET /api/likes/user/:user_id)
 exports.getLikesByUser = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { userId } = req.params;
     const likes = await Like.findAll({
-      where: { user_id },
+      where: { userId },
       include: [{ model: Post, attributes: ["title", "description"] }],
     });
 
@@ -48,8 +55,19 @@ exports.getLikesByUser = async (req, res) => {
 // 4. Create a Like (POST /api/likes)
 exports.addLike = async (req, res) => {
   try {
-    const { user_id, post_id } = req.body;
-    const newLike = await Like.create({ user_id, post_id });
+    const { userId, postId } = req.body;
+
+    // Check if the like already exists
+    const existingLike = await Like.findOne({ where: { userId, postId } });
+
+    if (existingLike) {
+      return res.status(400).json({
+        result: 400,
+        message: "User has already liked this post",
+      });
+    }
+
+    const newLike = await Like.create({ userId, postId });
 
     res.json({
       result: 200,
@@ -65,8 +83,8 @@ exports.addLike = async (req, res) => {
 // 5. Delete a Like (DELETE /api/likes/:id)
 exports.deleteLike = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await Like.destroy({ where: { id } });
+    const { likeId } = req.params;
+    const deleted = await Like.destroy({ where: { likeId } });
 
     if (!deleted) return res.status(404).json({ message: "Like not found" });
 
