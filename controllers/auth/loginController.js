@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../../models/userModel");
 require("dotenv").config();
 
-// 1. Login a user & generate JSON Web Token token
+// 1. Login a user & generate JSON Web Token
 exports.login = async (req, res) => {
   try {
     const { emailAddress, password } = req.body;
@@ -33,7 +33,11 @@ exports.login = async (req, res) => {
 };
 
 // JWT features:
-// Stateless authentication - no need for server-side session storage
+// Stateless authentication - self contatined: no need for server-side session storage
 // Secure - Cryptographic signing
-// Compact - Short & UEL-safe token format
+// Compact - Short & URL-safe token format
 // Cross platform - works with web, mobile & API's
+// HEADER.PAYLOAD.SIGNATURE
+// Header contains metadata on token type & encryption
+// Payload stores the userId data
+// Signature is a cryptographic one, ensuring token integrity

@@ -1,16 +1,6 @@
 const User = require("../models/userModel");
 
-// 1. Create a new user
-exports.createUser = async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// 2. Get all users
+// 1. Get all users
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
@@ -20,7 +10,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// 3. Get a single user by ID
+// 2. Get a single user by ID
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -30,7 +20,7 @@ exports.getUser = async (req, res) => {
   }
 };
 
-// 4. Update a user by ID
+// 3. Update a user by ID
 exports.updateUser = async (req, res) => {
   try {
     // Check if the user exists first
@@ -50,7 +40,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// 5. Delete a user
+// 4. Delete a user
 exports.deleteUser = async (req, res) => {
   try {
     const deleted = await User.destroy({ where: { userId: req.params.id } });
